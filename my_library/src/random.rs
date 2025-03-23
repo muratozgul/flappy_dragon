@@ -48,7 +48,6 @@ impl bevy::prelude::Plugin for RandomPlugin {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;

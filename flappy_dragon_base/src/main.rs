@@ -15,7 +15,7 @@ struct Assets {
     wall: Handle<Image>,
 }
 
-#[derive(Clone, PartialEq, Eq, Debug, Hash, Default, States)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, Default, States)]
 enum GamePhase {
     MainMenu,
     #[default]
