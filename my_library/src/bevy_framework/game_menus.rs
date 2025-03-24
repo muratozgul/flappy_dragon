@@ -35,8 +35,6 @@ pub(crate) fn setup<T: PluginState>(
         .spawn(Sprite::from(menu_graphic))
         .insert(Transform::from_xyz(0.0, 0.0, 1.0))
         .insert(MenuElement);
-
-    setup_debug(commands);
 }
 
 pub(crate) fn run<T: PluginState>(
@@ -62,32 +60,5 @@ pub(crate) fn run<T: PluginState>(
         else if keyboard.just_pressed(KeyCode::KeyQ) {
             exit.send(AppExit::Success);
         }
-    }
-}
-
-pub(crate) fn setup_debug(
-    mut commands: Commands,
-) {
-    commands
-        .spawn(Node {
-            position_type: PositionType::Absolute,
-            right: Val::Px(10.0),
-            top: Val::Px(10.0),
-            ..default()
-        })
-        .with_children(|parent| {
-            parent.spawn((
-                Text::new("Murat"),
-                TextColor(WHITE.into()),
-            )).insert(DebugText);
-        });
-}
-
-pub(crate) fn update_debug_text<T: PluginState>(
-    game_state: Res<State<T>>,
-    mut query: Query<&mut Text, With<DebugText>>,
-) {
-    if let Ok(mut text) = query.get_single_mut() {
-        text.0 = format!("State: {:?}", game_state.get());
     }
 }

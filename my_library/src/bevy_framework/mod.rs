@@ -3,6 +3,29 @@ use bevy::prelude::*;
 mod game_menus;
 use game_menus::PluginState;
 
+#[macro_export]
+macro_rules! add_phase {
+    (
+        $app:expr, $type:ty, $phase:expr,
+        start => [ $($start:expr),* ],
+        run => [ $($run:expr),* ],
+        exit => [ $($exit:expr),* ],
+    ) => {
+        $($app.add_systems(
+            bevy::prelude::OnEnter::<$type>($phase),
+            $start
+        );)*
+        $($app.add_systems(
+            bevy::prelude::Update,
+            $run.run_if(in_state($phase))
+        );)*
+        $($app.add_systems(
+            bevy::prelude::OnExit::<$type>($phase),
+            $exit
+        );)*
+    }
+}
+
 pub struct GameStatePlugin<T: PluginState> {
     menu_state: T,
     game_start_state: T,
@@ -56,8 +79,6 @@ impl<T: PluginState> Plugin for GameStatePlugin<T> {
             OnExit(self.game_end_state),
             cleanup::<game_menus::MenuElement>
         );
-
-        app.add_systems(Update, game_menus::update_debug_text::<T>);
     }
 }
 

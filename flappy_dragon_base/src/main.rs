@@ -27,8 +27,15 @@ enum GamePhase {
 struct FlappyElement;
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
+    let mut app = App::new();
+
+    add_phase!(app, GamePhase, GamePhase::Flapping,
+        start => [setup],
+        run => [gravity, flap, clamp, move_walls, hit_wall],
+        exit => [cleanup::<FlappyElement>],
+    );
+    
+    app.add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "Flappy Dragon - Bevy Edition".to_string(),
                 resolution: bevy::window::WindowResolution::new(1024.0, 768.0),
@@ -44,12 +51,6 @@ fn main() {
                 GamePhase::GameOver
             )
         )
-        .add_systems(OnEnter(GamePhase::Flapping), setup)
-        .add_systems(
-            Update,
-            (gravity, flap, clamp, move_walls, hit_wall).run_if(in_state(GamePhase::Flapping))
-        )
-        .add_systems(OnExit(GamePhase::Flapping), cleanup::<FlappyElement>)
         .run();
 }
 
@@ -66,7 +67,7 @@ fn setup(
     commands.spawn(Camera2d::default()).insert(FlappyElement);
     commands
         .spawn(Sprite::from(assets.dragon.clone()))
-        .insert(Transform::from_xyz(490.0, 0.0, 1.0))
+        .insert(Transform::from_xyz(-490.0, 0.0, 1.0))
         .insert(Flappy { gravity: 0.0 })
         .insert(FlappyElement);
 
