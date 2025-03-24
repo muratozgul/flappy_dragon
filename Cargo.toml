@@ -9,4 +9,5 @@ members = [ "flappy_dragon_base",
 ]
 
 [workspace.dependencies]
+anyhow = "1.0.97"
 bevy = "0.15.3"
