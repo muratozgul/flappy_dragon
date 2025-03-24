@@ -1,16 +1,13 @@
 use super::{MenuAssets, MenuResource};
-use bevy::{app::AppExit, color::palettes::css::WHITE, prelude::*, state::state::FreelyMutableState};
+use bevy::{app::AppExit, prelude::*, state::state::FreelyMutableState};
 use trait_set::trait_set;
 
 trait_set! {
-    pub trait PluginState = FreelyMutableState + FromWorld + Copy;
+    pub trait PluginState = FreelyMutableState + Copy + Default;
 }
 
 #[derive(Component)]
 pub(crate) struct MenuElement;
-
-#[derive(Component)]
-pub(crate) struct DebugText;
 
 pub(crate) fn setup<T: PluginState>(
     state: Res<State<T>>,

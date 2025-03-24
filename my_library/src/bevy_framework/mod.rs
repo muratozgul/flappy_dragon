@@ -27,6 +27,7 @@ macro_rules! add_phase {
 }
 
 pub struct GameStatePlugin<T: PluginState> {
+    setup_state: T,
     menu_state: T,
     game_start_state: T,
     game_end_state: T,
@@ -34,8 +35,14 @@ pub struct GameStatePlugin<T: PluginState> {
 
 impl<T: PluginState> GameStatePlugin<T> {
     #[allow(clippy::new_without_default)]
-    pub fn new(menu_state: T, game_start_state: T, game_end_state: T) -> Self {
+    pub fn new(
+        setup_state: T,
+        menu_state: T,
+        game_start_state: T,
+        game_end_state: T
+    ) -> Self {
         Self {
+            setup_state,
             menu_state,
             game_start_state,
             game_end_state,
@@ -45,7 +52,7 @@ impl<T: PluginState> GameStatePlugin<T> {
 
 impl<T: PluginState> Plugin for GameStatePlugin<T> {
     fn build(&self, app: &mut App) {
-        app.init_state::<T>();
+        app.insert_state(self.setup_state);
         let start = MenuResource {
             menu_state: self.menu_state,
             game_start_state: self.game_start_state,
@@ -54,6 +61,10 @@ impl<T: PluginState> Plugin for GameStatePlugin<T> {
         app.insert_resource(start);
 
         app.add_systems(Startup, setup_menus);
+        app.add_systems(
+            PostStartup,
+            |mut state: ResMut<NextState<T>>| state.set(T::default())
+        );
 
         app.add_systems(
             OnEnter(self.menu_state),

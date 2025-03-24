@@ -17,8 +17,9 @@ struct Assets {
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, Default, States)]
 enum GamePhase {
-    MainMenu,
+    Setup,
     #[default]
+    MainMenu,
     Flapping,
     GameOver,
 }
@@ -46,6 +47,7 @@ fn main() {
         .add_plugins(RandomPlugin)
         .add_plugins(
             GameStatePlugin::<GamePhase>::new(
+                GamePhase::Setup,
                 GamePhase::MainMenu,
                 GamePhase::Flapping,
                 GamePhase::GameOver
