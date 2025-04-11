@@ -1,5 +1,8 @@
+use rand::{
+    Rng, SeedableRng,
+    distr::uniform::{SampleRange, SampleUniform},
+};
 use std::sync::Mutex;
-use rand::{distr::uniform::{SampleUniform, SampleRange}, Rng, SeedableRng};
 
 #[cfg(all(not(feature = "pcg"), not(feature = "xorshift")))]
 type RngCore = rand::prelude::StdRng;
@@ -29,14 +32,16 @@ impl RandomNumberGenerator {
     }
 
     pub fn next<T>(&self) -> T
-    where rand::distr::StandardUniform: rand::prelude::Distribution<T>
+    where
+        rand::distr::StandardUniform: rand::prelude::Distribution<T>,
     {
         let mut lock = self.rng.lock().unwrap();
         lock.random()
     }
 
     pub fn range<T>(&self, range: impl SampleRange<T>) -> T
-    where T: SampleUniform + PartialOrd
+    where
+        T: SampleUniform + PartialOrd,
     {
         let mut lock = self.rng.lock().unwrap();
         lock.random_range(range)
@@ -56,7 +61,6 @@ impl bevy::prelude::Plugin for RandomPlugin {
         app.insert_resource(RandomNumberGenerator::new());
     }
 }
-
 
 #[cfg(test)]
 mod test {

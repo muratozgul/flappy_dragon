@@ -1,6 +1,5 @@
-use bevy::{prelude::*, app::Plugin, ecs::system::Resource};
-
-use super::AssetStore;
+use crate::AssetStore;
+use bevy::prelude::*;
 
 #[derive(Clone)]
 pub enum AssetType {
@@ -39,9 +38,8 @@ impl AssetManager {
             }
         }
 
-        self.asset_list.push((
-            tag.to_string(), filename, AssetType::Image
-        ));
+        self.asset_list
+            .push((tag.to_string(), filename, AssetType::Image));
         Ok(self)
     }
 }
@@ -61,17 +59,16 @@ fn setup(
     let mut assets = AssetStore {
         asset_index: bevy::utils::HashMap::new(),
     };
-    asset_resource.asset_list.iter().for_each(
-        |(tag, filename, asset_type)| {
-            match asset_type {
-                _ => {
-                    assets
-                        .asset_index
-                        .insert(tag.clone(), asset_server.load_untyped(filename));
-                }
+    asset_resource
+        .asset_list
+        .iter()
+        .for_each(|(tag, filename, asset_type)| match asset_type {
+            _ => {
+                assets
+                    .asset_index
+                    .insert(tag.clone(), asset_server.load_untyped(filename));
             }
-        }
-    );
+        });
     commands.remove_resource::<AssetManager>();
     commands.insert_resource(assets);
 }

@@ -11,7 +11,6 @@ struct Obstacle;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, Default, States)]
 enum GamePhase {
-    Setup,
     #[default]
     MainMenu,
     Flapping,
@@ -29,30 +28,27 @@ fn main() -> anyhow::Result<()> {
         run => [gravity, flap, clamp, move_walls, hit_wall],
         exit => [cleanup::<FlappyElement>],
     );
-    
+
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "Flappy Dragon - Bevy Edition".to_string(),
-                resolution: bevy::window::WindowResolution::new(1024.0, 768.0),
-                ..default()
-            }),
+        primary_window: Some(Window {
+            title: "Flappy Dragon - Bevy Edition".to_string(),
+            resolution: bevy::window::WindowResolution::new(1024.0, 768.0),
             ..default()
-        }))
-        .add_plugins(RandomPlugin)
-        .add_plugins(
-            GameStatePlugin::<GamePhase>::new(
-                GamePhase::Setup,
-                GamePhase::MainMenu,
-                GamePhase::Flapping,
-                GamePhase::GameOver
-            )
-        )
-        .add_plugins(
-            AssetManager::new()
-                .add_image("dragon", "flappy_dragon.png")?
-                .add_image("wall", "wall.png")?
-        )
-        .run();
+        }),
+        ..default()
+    }))
+    .add_plugins(RandomPlugin)
+    .add_plugins(GameStatePlugin::new(
+        GamePhase::MainMenu,
+        GamePhase::Flapping,
+        GamePhase::GameOver,
+    ))
+    .add_plugins(
+        AssetManager::new()
+            .add_image("dragon", "flappy_dragon.png")?
+            .add_image("wall", "wall.png")?,
+    )
+    .run();
 
     Ok(())
 }
@@ -63,33 +59,37 @@ fn setup(
     assets: Res<AssetStore>,
     loaded_assets: AssetResource,
 ) {
-    let dragon = assets.get_handle("dragon", &loaded_assets).unwrap();
-    
     commands.spawn(Camera2d::default()).insert(FlappyElement);
-    commands
-        .spawn(Sprite::from(dragon))
-        .insert(Transform::from_xyz(-490.0, 0.0, 1.0))
-        .insert(Flappy { gravity: 0.0 })
-        .insert(FlappyElement);
+    spawn_image!(
+        assets,
+        commands,
+        "dragon",
+        -490.0, 0.0, 1.0,
+        &loaded_assets,
+        Flappy { gravity: 0.0 },
+        FlappyElement
+    );
 
-    build_wall(&mut commands, &assets, &loaded_assets, rng.range(-5..5));
+    build_wall(&mut commands, &assets, rng.range(-5..5), &loaded_assets);
 }
 
 fn build_wall(
     commands: &mut Commands,
-    assets: &Res<AssetStore>,
-    loaded_assets: &AssetResource,
+    assets: &AssetStore,
     gap_y: i32,
+    loaded_assets: &LoadedAssets,
 ) {
-    let wall = assets.get_handle("wall", loaded_assets).unwrap();
-
     for y in -12..=12 {
         if y < gap_y - 4 || y > gap_y + 4 {
-            commands
-                .spawn(Sprite::from(wall.clone()))
-                .insert(Transform::from_xyz(512.0, y as f32 * 32.0, 1.0))
-                .insert(Obstacle)
-                .insert(FlappyElement);
+            spawn_image!(
+                assets,
+                commands,
+                "wall",
+                512.0, y as f32 * 32.0, 1.0, 
+                &loaded_assets,
+                Obstacle,
+                FlappyElement
+            );
         }
     }
 }
@@ -141,7 +141,7 @@ fn move_walls(
         for entity in delete.iter() {
             commands.entity(entity).despawn();
         }
-        build_wall(&mut commands, &assets, &loaded_assets, rng.range(-5..5));
+        build_wall(&mut commands, &assets, rng.range(-5..5), &loaded_assets);
     }
 }
 

@@ -1,4 +1,7 @@
-use rand::{distr::uniform::{SampleUniform, SampleRange}, Rng, SeedableRng};
+use rand::{
+    Rng, SeedableRng,
+    distr::uniform::{SampleRange, SampleUniform},
+};
 
 #[cfg(all(not(feature = "pcg"), not(feature = "xorshift")))]
 type RngCore = rand::prelude::StdRng;
@@ -28,7 +31,8 @@ impl RandomNumberGenerator {
     }
 
     pub fn range<T>(&mut self, range: impl SampleRange<T>) -> T
-    where T: SampleUniform + PartialOrd
+    where
+        T: SampleUniform + PartialOrd,
     {
         self.rng.random_range(range)
     }
