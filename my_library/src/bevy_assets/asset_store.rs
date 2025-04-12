@@ -7,7 +7,7 @@ use bevy::{
 pub type LoadedAssets = Assets<LoadedUntypedAsset>;
 pub type AssetResource<'w> = Res<'w, LoadedAssets>;
 
-#[derive(Resource)]
+#[derive(Resource, Clone)]
 pub struct AssetStore {
     pub(crate) asset_index: HashMap<String, Handle<LoadedUntypedAsset>>,
 }
@@ -26,5 +26,16 @@ impl AssetStore {
         } else {
             None
         }
+    }
+
+    pub fn play(
+        &self,
+        sound_name: &str,
+        commands: &mut Commands,
+        assets: &LoadedAssets,
+    ) {
+        let sound_handle: Handle<AudioSource> =
+            self.get_handle(sound_name, assets).unwrap();
+        commands.spawn((AudioPlayer::new(sound_handle.clone()),));
     }
 }

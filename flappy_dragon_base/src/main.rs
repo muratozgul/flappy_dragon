@@ -12,6 +12,7 @@ struct Obstacle;
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, Default, States)]
 enum GamePhase {
     #[default]
+    Loading,
     MainMenu,
     Flapping,
     GameOver,
@@ -46,7 +47,9 @@ fn main() -> anyhow::Result<()> {
     .add_plugins(
         AssetManager::new()
             .add_image("dragon", "flappy_dragon.png")?
-            .add_image("wall", "wall.png")?,
+            .add_image("wall", "wall.png")?
+            .add_sound("flap", "dragonflap.ogg")?
+            .add_sound("crash", "crash.ogg")?
     )
     .run();
 
@@ -64,7 +67,9 @@ fn setup(
         assets,
         commands,
         "dragon",
-        -490.0, 0.0, 1.0,
+        -490.0,
+        0.0,
+        1.0,
         &loaded_assets,
         Flappy { gravity: 0.0 },
         FlappyElement
@@ -85,7 +90,9 @@ fn build_wall(
                 assets,
                 commands,
                 "wall",
-                512.0, y as f32 * 32.0, 1.0, 
+                512.0,
+                y as f32 * 32.0,
+                1.0,
                 &loaded_assets,
                 Obstacle,
                 FlappyElement
@@ -101,10 +108,17 @@ fn gravity(mut query: Query<(&mut Flappy, &mut Transform)>) {
     }
 }
 
-fn flap(keyboard: Res<ButtonInput<KeyCode>>, mut query: Query<&mut Flappy>) {
+fn flap(
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mut query: Query<&mut Flappy>,
+    assets: Res<AssetStore>,
+    loaded: Res<LoadedAssets>,
+    mut commands: Commands,
+) {
     if keyboard.pressed(KeyCode::Space) {
         if let Ok(mut flappy) = query.get_single_mut() {
             flappy.gravity = -5.0;
+            assets.play("flap", &mut commands, &loaded);
         }
     }
 }
@@ -149,11 +163,15 @@ fn hit_wall(
     player: Query<&Transform, With<Flappy>>,
     walls: Query<&Transform, With<Obstacle>>,
     mut state: ResMut<NextState<GamePhase>>,
+    assets: Res<AssetStore>,
+    loaded_assets: Res<LoadedAssets>,
+    mut commands: Commands,
 ) {
     if let Ok(player) = player.get_single() {
         for wall in walls.iter() {
             let distance = player.translation.distance(wall.translation);
             if distance < 32.0 {
+                assets.play("crash", &mut commands, &loaded_assets);
                 state.set(GamePhase::GameOver);
             }
         }

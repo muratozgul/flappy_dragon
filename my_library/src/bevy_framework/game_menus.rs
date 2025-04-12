@@ -1,6 +1,6 @@
-use super::{MenuAssets, MenuResource};
-use bevy::{app::AppExit, prelude::*};
+use crate::{AssetStore, MenuResource};
 use bevy::state::state::FreelyMutableState;
+use bevy::{app::AppExit, prelude::*};
 use trait_set::trait_set;
 
 // trait_set! {
@@ -17,16 +17,17 @@ pub(crate) fn setup<T: PluginState>(
     state: Res<State<T>>,
     mut commands: Commands,
     menu_resource: Res<MenuResource<T>>,
-    asset_server: Res<AssetServer>,
+    loaded_assets: crate::AssetResource,
+    assets: Res<AssetStore>,
 ) {
-    let menu_assets = MenuAssets {
-        main_menu: asset_server.load("main_menu.png"),
-        game_over: asset_server.load("game_over.png"),
-    };
     let current_state = state.get();
     let menu_graphic = match current_state {
-        current_state if menu_resource.menu_state == *current_state => menu_assets.main_menu.clone(),
-        current_state if menu_resource.game_end_state == *current_state => menu_assets.game_over.clone(),
+        current_state if menu_resource.menu_state == *current_state => {
+            assets.get_handle("main_menu", &loaded_assets).unwrap()
+        }
+        current_state if menu_resource.game_end_state == *current_state => {
+            assets.get_handle("game_over", &loaded_assets).unwrap()
+        }
         _ => panic!("Unknown menu state"),
     };
 
