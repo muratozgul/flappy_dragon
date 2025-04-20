@@ -3,6 +3,9 @@ use bevy::prelude::*;
 mod game_menus;
 pub use game_menus::PluginState;
 
+mod bevy_animation;
+pub use bevy_animation::*;
+
 #[macro_export]
 macro_rules! add_phase {
     (
