@@ -6,6 +6,9 @@ pub use game_menus::PluginState;
 mod bevy_animation;
 pub use bevy_animation::*;
 
+mod bevy_physics;
+pub use bevy_physics::*;
+
 #[macro_export]
 macro_rules! add_phase {
     (
@@ -54,6 +57,8 @@ impl<T: PluginState + Copy + Default> Plugin for GameStatePlugin<T> {
     fn build(&self, app: &mut App) {
         app.init_state::<T>();
         app.add_plugins(bevy_egui::EguiPlugin);
+        app.add_event::<PhysicsTick>();
+        app.add_event::<Impulse>();
 
         let start = MenuResource {
             menu_state: self.menu_state,
