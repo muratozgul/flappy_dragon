@@ -9,6 +9,9 @@ pub use bevy_animation::*;
 mod bevy_physics;
 pub use bevy_physics::*;
 
+mod bevy_collision;
+pub use bevy_collision::*;
+
 #[macro_export]
 macro_rules! add_phase {
     (

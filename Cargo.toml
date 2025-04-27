@@ -4,11 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [workspace]
-members = [ "flappy_dragon_base",
-  "my_library"
+members = [
+  "my_library",
+  "flappy_dragon_base",
+  "bouncy",
 ]
 
 [workspace.dependencies]
-anyhow = "1.0.97"
+anyhow = "1.0.98"
 bevy = "0.15.3"
 bevy_egui = "0.33.0"
